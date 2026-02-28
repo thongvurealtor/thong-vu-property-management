@@ -1,36 +1,114 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Property Management
 
-## Getting Started
+A full-stack property management web app built with Next.js 16, Prisma 7, PostgreSQL, and Tailwind CSS.
 
-First, run the development server:
+## Features
+
+- **Dashboard** – Summary of properties, tenants, active leases, open maintenance, and overdue payments
+- **Properties** – List, add, edit, delete properties with status tracking
+- **Tenants** – Manage tenant contacts and view their lease/payment history
+- **Leases** – Create and track lease agreements with status (Active / Expired / Terminated)
+- **Maintenance** – Log and track maintenance requests by priority and status
+- **Payments** – Record and track payments with one-click "Mark Paid"
+
+## Tech Stack
+
+- **Framework**: Next.js 16 (App Router, TypeScript)
+- **Database**: PostgreSQL (via Prisma 7 + `@prisma/adapter-pg`)
+- **Styling**: Tailwind CSS v4
+- **Forms**: React Hook Form + Zod validation
+- **Deployment**: Vercel
+
+---
+
+## Local Development
+
+### 1. Prerequisites
+
+- Node.js 18+
+- A PostgreSQL database (local or cloud — [Neon](https://neon.tech) and [Supabase](https://supabase.com) both offer free tiers)
+
+### 2. Install dependencies
+
+```bash
+npm install
+```
+
+### 3. Configure environment variables
+
+Copy the example and fill in your database URL:
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env`:
+
+```
+DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/DBNAME?schema=public"
+```
+
+> For Neon or Supabase, use the **pooled** connection string.
+
+### 4. Run migrations
+
+```bash
+npm run db:migrate
+```
+
+### 5. (Optional) Seed sample data
+
+```bash
+npm run db:seed
+```
+
+### 6. Start the dev server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Deploy to Vercel
 
-## Learn More
+1. Push this repo to GitHub.
+2. Connect the repo in [Vercel](https://vercel.com).
+3. Set the `DATABASE_URL` environment variable in Vercel → Project → Settings → Environment Variables.
+4. Deploy. Vercel will automatically run `npm install` (which triggers `prisma generate`).
+5. After the first deploy, run migrations against production once:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+DATABASE_URL="your-production-url" npm run db:deploy
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Project Structure
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+app/
+  app/
+    dashboard/          # All dashboard pages (layout + modules)
+      page.tsx          # Summary dashboard
+      properties/
+      tenants/
+      leases/
+      maintenance/
+      payments/
+    api/                # REST API routes (CRUD for each resource)
+    layout.tsx
+    page.tsx            # Redirects to /dashboard
+  components/
+    Sidebar.tsx
+    forms/              # React Hook Form components per resource
+    ui/                 # Button, Input, Select, Card, Modal, Badge
+  lib/
+    prisma.ts           # Prisma client singleton
+    validations/        # Zod schemas
+  prisma/
+    schema.prisma       # Database models
+    seed.ts             # Sample data seed
+```

@@ -1,0 +1,104 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Property {
+  id          String               @id @default(cuid())
+  address     String
+  type        String
+  bedrooms    Int
+  bathrooms   Int
+  rent        Float
+  status      PropertyStatus       @default(AVAILABLE)
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+  leases      Lease[]
+  maintenance MaintenanceRequest[]
+}
+
+model Tenant {
+  id          String               @id @default(cuid())
+  name        String
+  email       String               @unique
+  phone       String?
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+  leases      Lease[]
+  maintenance MaintenanceRequest[]
+}
+
+model Lease {
+  id          String      @id @default(cuid())
+  propertyId  String
+  tenantId    String
+  startDate   DateTime
+  endDate     DateTime
+  monthlyRent Float
+  status      LeaseStatus @default(ACTIVE)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  property    Property    @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  tenant      Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  payments    Payment[]
+}
+
+model MaintenanceRequest {
+  id          String            @id @default(cuid())
+  propertyId  String
+  tenantId    String?
+  description String
+  status      MaintenanceStatus @default(OPEN)
+  priority    Priority          @default(MEDIUM)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  property    Property          @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  tenant      Tenant?           @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+}
+
+model Payment {
+  id      String        @id @default(cuid())
+  leaseId String
+  amount  Float
+  dueDate DateTime
+  paidAt  DateTime?
+  status  PaymentStatus @default(PENDING)
+  lease   Lease         @relation(fields: [leaseId], references: [id], onDelete: Cascade)
+}
+
+enum PropertyStatus {
+  AVAILABLE
+  OCCUPIED
+  MAINTENANCE
+}
+
+enum LeaseStatus {
+  ACTIVE
+  EXPIRED
+  TERMINATED
+}
+
+enum MaintenanceStatus {
+  OPEN
+  IN_PROGRESS
+  CLOSED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  OVERDUE
+}
