@@ -16,6 +16,9 @@ type Lease = {
   status: "ACTIVE" | "EXPIRED" | "TERMINATED";
   propertyId: string;
   tenantId: string;
+  alertEnabled: boolean;
+  alertDaysBefore: number | null;
+  alertMethod: "EMAIL" | "SMS" | "BOTH" | null;
   property: { id: string; address: string };
   tenant: { id: string; name: string };
   _count: { payments: number };
@@ -87,6 +90,7 @@ export default function LeasesPage() {
                   <th className="text-left px-5 py-3 text-gray-600 font-medium">Period</th>
                   <th className="text-left px-5 py-3 text-gray-600 font-medium">Rent/mo</th>
                   <th className="text-left px-5 py-3 text-gray-600 font-medium">Payments</th>
+                  <th className="text-left px-5 py-3 text-gray-600 font-medium">Alert</th>
                   <th className="text-left px-5 py-3 text-gray-600 font-medium">Status</th>
                   <th className="px-5 py-3" />
                 </tr>
@@ -111,6 +115,21 @@ export default function LeasesPage() {
                       ${l.monthlyRent.toLocaleString()}
                     </td>
                     <td className="px-5 py-3 text-gray-500">{l._count.payments}</td>
+                    <td className="px-5 py-3 text-center">
+                      {l.alertEnabled ? (
+                        <span className="text-blue-600" title={`Custom: ${l.alertDaysBefore}d via ${l.alertMethod}`}>
+                          <svg className="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                          </svg>
+                        </span>
+                      ) : (
+                        <span className="text-gray-300" title="Using global default">
+                          <svg className="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                          </svg>
+                        </span>
+                      )}
+                    </td>
                     <td className="px-5 py-3">
                       <Badge variant={statusVariant[l.status] ?? "gray"}>{l.status}</Badge>
                     </td>
@@ -144,6 +163,9 @@ export default function LeasesPage() {
                   endDate: editing.endDate,
                   monthlyRent: editing.monthlyRent,
                   status: editing.status,
+                  alertEnabled: editing.alertEnabled,
+                  alertDaysBefore: editing.alertDaysBefore,
+                  alertMethod: editing.alertMethod,
                 }
               : undefined
           }

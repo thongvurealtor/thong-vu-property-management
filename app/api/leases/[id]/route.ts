@@ -30,6 +30,13 @@ export async function PATCH(
     const data: Record<string, unknown> = { ...raw };
     if (raw.startDate) data.startDate = new Date(raw.startDate);
     if (raw.endDate) data.endDate = new Date(raw.endDate);
+    if (raw.alertEnabled === false) {
+      data.alertDaysBefore = null;
+      data.alertMethod = null;
+    }
+    if (raw.endDate || raw.alertDaysBefore !== undefined) {
+      data.alertSentAt = null;
+    }
     const lease = await prisma.lease.update({
       where: { id },
       data,

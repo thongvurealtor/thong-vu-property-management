@@ -22,6 +22,17 @@ export const leaseSchema = z.object({
   endDate: z.string().min(1, "End date is required"),
   monthlyRent: z.coerce.number().positive("Must be positive"),
   status: z.enum(["ACTIVE", "EXPIRED", "TERMINATED"]).optional(),
+  alertEnabled: z.coerce.boolean().optional(),
+  alertDaysBefore: z.coerce.number().int().min(1).optional().nullable(),
+  alertMethod: z.enum(["EMAIL", "SMS", "BOTH"]).optional().nullable(),
+});
+
+export const notificationSettingsSchema = z.object({
+  email: z.string().email("Invalid email").optional().or(z.literal("")),
+  phone: z.string().optional().or(z.literal("")),
+  defaultAlertEnabled: z.coerce.boolean(),
+  defaultAlertDaysBefore: z.coerce.number().int().min(1, "Must be at least 1 day"),
+  defaultAlertMethod: z.enum(["EMAIL", "SMS", "BOTH"]),
 });
 
 export const maintenanceSchema = z.object({
@@ -45,3 +56,4 @@ export type TenantInput = z.infer<typeof tenantSchema>;
 export type LeaseInput = z.infer<typeof leaseSchema>;
 export type MaintenanceInput = z.infer<typeof maintenanceSchema>;
 export type PaymentInput = z.infer<typeof paymentSchema>;
+export type NotificationSettingsInput = z.infer<typeof notificationSettingsSchema>;

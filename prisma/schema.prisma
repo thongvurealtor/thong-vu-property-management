@@ -36,18 +36,32 @@ model Tenant {
 }
 
 model Lease {
-  id          String      @id @default(cuid())
-  propertyId  String
-  tenantId    String
-  startDate   DateTime
-  endDate     DateTime
-  monthlyRent Float
-  status      LeaseStatus @default(ACTIVE)
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  property    Property    @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-  tenant      Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  payments    Payment[]
+  id              String       @id @default(cuid())
+  propertyId      String
+  tenantId        String
+  startDate       DateTime
+  endDate         DateTime
+  monthlyRent     Float
+  status          LeaseStatus  @default(ACTIVE)
+  alertEnabled    Boolean      @default(false)
+  alertDaysBefore Int?
+  alertMethod     AlertMethod?
+  alertSentAt     DateTime?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  property        Property     @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  tenant          Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  payments        Payment[]
+}
+
+model NotificationSettings {
+  id                    String      @id @default("default")
+  email                 String?
+  phone                 String?
+  defaultAlertEnabled   Boolean     @default(true)
+  defaultAlertDaysBefore Int        @default(30)
+  defaultAlertMethod    AlertMethod @default(EMAIL)
+  updatedAt             DateTime    @updatedAt
 }
 
 model MaintenanceRequest {
@@ -101,4 +115,10 @@ enum PaymentStatus {
   PENDING
   PAID
   OVERDUE
+}
+
+enum AlertMethod {
+  EMAIL
+  SMS
+  BOTH
 }

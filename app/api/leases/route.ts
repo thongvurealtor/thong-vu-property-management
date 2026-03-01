@@ -24,9 +24,15 @@ export async function POST(req: NextRequest) {
     const data = leaseSchema.parse(body);
     const lease = await prisma.lease.create({
       data: {
-        ...data,
+        propertyId: data.propertyId,
+        tenantId: data.tenantId,
         startDate: new Date(data.startDate),
         endDate: new Date(data.endDate),
+        monthlyRent: data.monthlyRent,
+        status: data.status ?? "ACTIVE",
+        alertEnabled: data.alertEnabled ?? false,
+        alertDaysBefore: data.alertEnabled ? data.alertDaysBefore : null,
+        alertMethod: data.alertEnabled ? data.alertMethod : null,
       },
       include: { property: true, tenant: true },
     });

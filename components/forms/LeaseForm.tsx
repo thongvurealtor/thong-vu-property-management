@@ -17,6 +17,12 @@ const statusOptions = [
   { value: "TERMINATED", label: "Terminated" },
 ];
 
+const alertMethodOptions = [
+  { value: "EMAIL", label: "Email" },
+  { value: "SMS", label: "Text (SMS)" },
+  { value: "BOTH", label: "Both" },
+];
+
 function toDateInput(val: string | Date | undefined): string {
   if (!val) return "";
   const d = new Date(val);
@@ -47,6 +53,7 @@ export default function LeaseForm({ defaultValues, onSuccess, onCancel }: Props)
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<LeaseInput>({
     resolver: zodResolver(leaseSchema) as Resolver<LeaseInput>,
@@ -56,12 +63,21 @@ export default function LeaseForm({ defaultValues, onSuccess, onCancel }: Props)
           startDate: toDateInput(defaultValues.startDate),
           endDate: toDateInput(defaultValues.endDate),
           status: defaultValues.status ?? "ACTIVE",
+          alertEnabled: defaultValues.alertEnabled ?? false,
+          alertDaysBefore: defaultValues.alertDaysBefore ?? null,
+          alertMethod: defaultValues.alertMethod ?? null,
         }
-      : { status: "ACTIVE" },
+      : { status: "ACTIVE", alertEnabled: false },
   });
+
+  const alertEnabled = watch("alertEnabled");
 
   const onSubmit = async (data: LeaseInput) => {
     setError("");
+    if (!data.alertEnabled) {
+      data.alertDaysBefore = null;
+      data.alertMethod = null;
+    }
     const url = isEdit ? `/api/leases/${defaultValues!.id}` : "/api/leases";
     const method = isEdit ? "PATCH" : "POST";
     const res = await fetch(url, {
@@ -132,6 +148,45 @@ export default function LeaseForm({ defaultValues, onSuccess, onCancel }: Props)
           error={errors.status?.message}
         />
       )}
+
+      <div className="border-t border-gray-200 pt-4 mt-4">
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            {...register("alertEnabled")}
+          />
+          <span className="text-sm font-medium text-gray-700">
+            Custom alert for this lease
+          </span>
+        </label>
+        <p className="text-xs text-gray-400 mt-1 ml-6">
+          Override the global default. Leave unchecked to use global settings.
+        </p>
+      </div>
+
+      {alertEnabled && (
+        <div className="grid grid-cols-2 gap-3 pl-6">
+          <Input
+            id="alertDaysBefore"
+            label="Days before end"
+            type="number"
+            min={1}
+            placeholder="e.g. 30"
+            {...register("alertDaysBefore")}
+            error={errors.alertDaysBefore?.message}
+          />
+          <Select
+            id="alertMethod"
+            label="Notify via"
+            options={alertMethodOptions}
+            placeholder="Select..."
+            {...register("alertMethod")}
+            error={errors.alertMethod?.message}
+          />
+        </div>
+      )}
+
       {error && <p className="text-sm text-red-600">{error}</p>}
       <div className="flex gap-3 pt-2">
         <Button type="submit" loading={isSubmitting}>
