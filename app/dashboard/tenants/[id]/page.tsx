@@ -28,38 +28,37 @@ export default async function TenantDetailPage({
   });
   if (!tenant) notFound();
 
-  const serialized = {
-    ...tenant,
-    createdAt: tenant.createdAt.toISOString(),
-    updatedAt: tenant.updatedAt.toISOString(),
-    leases: tenant.leases.map((l) => ({
-      ...l,
-      startDate: l.startDate.toISOString(),
-      endDate: l.endDate.toISOString(),
-      createdAt: l.createdAt.toISOString(),
-      updatedAt: l.updatedAt.toISOString(),
-      property: {
-        ...l.property,
-        createdAt: l.property.createdAt.toISOString(),
-        updatedAt: l.property.updatedAt.toISOString(),
-      },
-      payments: l.payments.map((p) => ({
-        ...p,
-        dueDate: p.dueDate.toISOString(),
-        paidAt: p.paidAt?.toISOString() ?? null,
-      })),
-    })),
-    maintenance: tenant.maintenance.map((m) => ({
-      ...m,
-      createdAt: m.createdAt.toISOString(),
-      updatedAt: m.updatedAt.toISOString(),
-      property: {
-        ...m.property,
-        createdAt: m.property.createdAt.toISOString(),
-        updatedAt: m.property.updatedAt.toISOString(),
-      },
-    })),
-  };
-
-  return <TenantDetailClient tenant={serialized} />;
+  return (
+    <TenantDetailClient
+      tenant={{
+        id: tenant.id,
+        name: tenant.name,
+        email: tenant.email,
+        phone: tenant.phone,
+        createdAt: tenant.createdAt.toISOString(),
+        leases: tenant.leases.map((l) => ({
+          id: l.id,
+          startDate: l.startDate.toISOString(),
+          endDate: l.endDate.toISOString(),
+          monthlyRent: l.monthlyRent,
+          status: l.status,
+          property: { id: l.property.id, address: l.property.address },
+          payments: l.payments.map((p) => ({
+            id: p.id,
+            amount: p.amount,
+            dueDate: p.dueDate.toISOString(),
+            status: p.status,
+          })),
+        })),
+        maintenance: tenant.maintenance.map((m) => ({
+          id: m.id,
+          description: m.description,
+          status: m.status,
+          priority: m.priority,
+          createdAt: m.createdAt.toISOString(),
+          property: { id: m.property.id, address: m.property.address },
+        })),
+      }}
+    />
+  );
 }

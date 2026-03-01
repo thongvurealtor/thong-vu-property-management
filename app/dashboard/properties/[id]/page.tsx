@@ -19,24 +19,33 @@ export default async function PropertyDetailPage({
   });
   if (!property) notFound();
 
-  const serialized = {
-    ...property,
-    rent: property.rent,
-    leases: property.leases.map((l) => ({
-      ...l,
-      startDate: l.startDate.toISOString(),
-      endDate: l.endDate.toISOString(),
-      createdAt: l.createdAt.toISOString(),
-      updatedAt: l.updatedAt.toISOString(),
-    })),
-    maintenance: property.maintenance.map((m) => ({
-      ...m,
-      createdAt: m.createdAt.toISOString(),
-      updatedAt: m.updatedAt.toISOString(),
-    })),
-    createdAt: property.createdAt.toISOString(),
-    updatedAt: property.updatedAt.toISOString(),
-  };
-
-  return <PropertyDetailClient property={serialized} />;
+  return (
+    <PropertyDetailClient
+      property={{
+        id: property.id,
+        address: property.address,
+        type: property.type,
+        bedrooms: property.bedrooms,
+        bathrooms: property.bathrooms,
+        rent: property.rent,
+        status: property.status,
+        leases: property.leases.map((l) => ({
+          id: l.id,
+          startDate: l.startDate.toISOString(),
+          endDate: l.endDate.toISOString(),
+          monthlyRent: l.monthlyRent,
+          status: l.status,
+          tenant: { id: l.tenant.id, name: l.tenant.name },
+        })),
+        maintenance: property.maintenance.map((m) => ({
+          id: m.id,
+          description: m.description,
+          status: m.status,
+          priority: m.priority,
+          createdAt: m.createdAt.toISOString(),
+          tenant: m.tenant ? { id: m.tenant.id, name: m.tenant.name } : null,
+        })),
+      }}
+    />
+  );
 }
