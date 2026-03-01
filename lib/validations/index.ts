@@ -49,6 +49,7 @@ export const paymentSchema = z.object({
   dueDate: z.string().min(1, "Due date is required"),
   status: z.enum(["PENDING", "PAID", "OVERDUE"]).optional(),
   paidAt: z.string().optional().nullable(),
+  paymentMethod: z.enum(["CHECK", "ZELLE", "VENMO", "ACH"]).optional().nullable(),
 });
 
 export type PropertyInput = z.infer<typeof propertySchema>;

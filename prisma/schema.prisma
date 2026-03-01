@@ -78,13 +78,14 @@ model MaintenanceRequest {
 }
 
 model Payment {
-  id      String        @id @default(cuid())
-  leaseId String
-  amount  Float
-  dueDate DateTime
-  paidAt  DateTime?
-  status  PaymentStatus @default(PENDING)
-  lease   Lease         @relation(fields: [leaseId], references: [id], onDelete: Cascade)
+  id            String         @id @default(cuid())
+  leaseId       String
+  amount        Float
+  dueDate       DateTime
+  paidAt        DateTime?
+  status        PaymentStatus  @default(PENDING)
+  paymentMethod PaymentMethod?
+  lease         Lease          @relation(fields: [leaseId], references: [id], onDelete: Cascade)
 }
 
 enum PropertyStatus {
@@ -121,4 +122,11 @@ enum AlertMethod {
   EMAIL
   SMS
   BOTH
+}
+
+enum PaymentMethod {
+  CHECK
+  ZELLE
+  VENMO
+  ACH
 }

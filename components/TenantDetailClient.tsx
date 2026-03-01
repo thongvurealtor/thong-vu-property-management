@@ -14,6 +14,7 @@ type Payment = {
   amount: number;
   dueDate: string;
   status: string;
+  paymentMethod: string | null;
 };
 
 type Lease = {
@@ -120,6 +121,9 @@ export default function TenantDetailClient({ tenant }: { tenant: Tenant }) {
                       <div key={p.id} className="flex items-center justify-between text-sm">
                         <span className="text-gray-600">
                           Due {new Date(p.dueDate).toLocaleDateString()}
+                          {p.paymentMethod && (
+                            <span className="text-gray-400 ml-1">via {p.paymentMethod}</span>
+                          )}
                         </span>
                         <div className="flex items-center gap-2">
                           <span className="font-medium">${p.amount.toLocaleString()}</span>

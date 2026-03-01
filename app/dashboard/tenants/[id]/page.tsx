@@ -48,6 +48,7 @@ export default async function TenantDetailPage({
             amount: p.amount,
             dueDate: p.dueDate.toISOString(),
             status: p.status,
+            paymentMethod: p.paymentMethod,
           })),
         })),
         maintenance: tenant.maintenance.map((m) => ({

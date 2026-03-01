@@ -21,6 +21,13 @@ const statusOptions = [
   { value: "OVERDUE", label: "Overdue" },
 ];
 
+const paymentMethodOptions = [
+  { value: "CHECK", label: "Check" },
+  { value: "ZELLE", label: "Zelle" },
+  { value: "VENMO", label: "Venmo" },
+  { value: "ACH", label: "ACH" },
+];
+
 function toDateInput(val: string | Date | undefined | null): string {
   if (!val) return "";
   const d = new Date(val);
@@ -56,6 +63,7 @@ export default function PaymentForm({ defaultValues, onSuccess, onCancel }: Prop
           dueDate: toDateInput(defaultValues.dueDate),
           paidAt: toDateInput(defaultValues.paidAt),
           status: defaultValues.status ?? "PENDING",
+          paymentMethod: defaultValues.paymentMethod ?? null,
         }
       : { status: "PENDING" },
   });
@@ -108,13 +116,23 @@ export default function PaymentForm({ defaultValues, onSuccess, onCancel }: Prop
         {...register("dueDate")}
         error={errors.dueDate?.message}
       />
-      <Select
-        id="status"
-        label="Status"
-        options={statusOptions}
-        {...register("status")}
-        error={errors.status?.message}
-      />
+      <div className="grid grid-cols-2 gap-3">
+        <Select
+          id="status"
+          label="Status"
+          options={statusOptions}
+          {...register("status")}
+          error={errors.status?.message}
+        />
+        <Select
+          id="paymentMethod"
+          label="Payment Method"
+          options={paymentMethodOptions}
+          placeholder="Select method..."
+          {...register("paymentMethod")}
+          error={errors.paymentMethod?.message}
+        />
+      </div>
       <Input
         id="paidAt"
         label="Paid On (optional)"

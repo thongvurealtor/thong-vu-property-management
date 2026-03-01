@@ -13,12 +13,20 @@ type Payment = {
   dueDate: string;
   paidAt: string | null;
   status: "PENDING" | "PAID" | "OVERDUE";
+  paymentMethod: "CHECK" | "ZELLE" | "VENMO" | "ACH" | null;
   lease: {
     id: string;
     monthlyRent: number;
     property: { address: string };
     tenant: { name: string };
   };
+};
+
+const methodLabel: Record<string, string> = {
+  CHECK: "Check",
+  ZELLE: "Zelle",
+  VENMO: "Venmo",
+  ACH: "ACH",
 };
 
 const statusVariant: Record<string, "green" | "yellow" | "red"> = {
@@ -150,6 +158,7 @@ export default function PaymentsPage() {
                   <th className="text-left px-5 py-3 text-gray-600 font-medium">Amount</th>
                   <th className="text-left px-5 py-3 text-gray-600 font-medium">Due Date</th>
                   <th className="text-left px-5 py-3 text-gray-600 font-medium">Paid On</th>
+                  <th className="text-left px-5 py-3 text-gray-600 font-medium">Method</th>
                   <th className="text-left px-5 py-3 text-gray-600 font-medium">Status</th>
                   <th className="px-5 py-3" />
                 </tr>
@@ -165,6 +174,9 @@ export default function PaymentsPage() {
                     <td className="px-5 py-3 text-gray-500">{new Date(p.dueDate).toLocaleDateString()}</td>
                     <td className="px-5 py-3 text-gray-500">
                       {p.paidAt ? new Date(p.paidAt).toLocaleDateString() : "—"}
+                    </td>
+                    <td className="px-5 py-3 text-gray-600">
+                      {p.paymentMethod ? methodLabel[p.paymentMethod] : "—"}
                     </td>
                     <td className="px-5 py-3">
                       <Badge variant={statusVariant[p.status] ?? "gray"}>{p.status}</Badge>
@@ -203,6 +215,7 @@ export default function PaymentsPage() {
                   dueDate: editing.dueDate,
                   paidAt: editing.paidAt,
                   status: editing.status,
+                  paymentMethod: editing.paymentMethod,
                 }
               : undefined
           }

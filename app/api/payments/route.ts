@@ -33,6 +33,7 @@ export async function POST(req: NextRequest) {
         dueDate: new Date(data.dueDate),
         status: data.status ?? "PENDING",
         paidAt: data.paidAt ? new Date(data.paidAt) : null,
+        paymentMethod: data.paymentMethod ?? null,
       },
       include: { lease: { include: { property: true, tenant: true } } },
     });
