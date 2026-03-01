@@ -26,13 +26,21 @@ export async function PATCH(
   try {
     const { id } = await params;
     const body = await req.json();
-    const data = maintenanceSchema.partial().parse(body);
+    const raw = maintenanceSchema.partial().parse(body);
+    const data: Record<string, unknown> = {
+      ...raw,
+      tenantId: raw.tenantId || null,
+    };
+    if (raw.requestedAt) data.requestedAt = new Date(raw.requestedAt);
+    else if (raw.requestedAt === null) data.requestedAt = null;
+    if (raw.completedAt) data.completedAt = new Date(raw.completedAt);
+    else if (raw.completedAt === null) data.completedAt = null;
+    if (raw.fixedBy === "") data.fixedBy = null;
+    if (raw.cost === null || raw.cost === undefined) delete data.cost;
+
     const request = await prisma.maintenanceRequest.update({
       where: { id },
-      data: {
-        ...data,
-        tenantId: data.tenantId || null,
-      },
+      data,
       include: { property: true, tenant: true },
     });
     return NextResponse.json(request);

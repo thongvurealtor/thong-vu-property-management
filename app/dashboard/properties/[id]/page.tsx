@@ -66,6 +66,10 @@ export default async function PropertyDetailPage({
           status: m.status,
           priority: m.priority,
           createdAt: m.createdAt.toISOString(),
+          requestedAt: m.requestedAt?.toISOString() ?? null,
+          completedAt: m.completedAt?.toISOString() ?? null,
+          cost: m.cost,
+          fixedBy: m.fixedBy,
           tenant: m.tenant ? { id: m.tenant.id, name: m.tenant.name } : null,
         })),
       }}

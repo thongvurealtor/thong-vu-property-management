@@ -33,6 +33,10 @@ export async function POST(req: NextRequest) {
         description: data.description,
         priority: data.priority ?? "MEDIUM",
         status: data.status ?? "OPEN",
+        requestedAt: data.requestedAt ? new Date(data.requestedAt) : null,
+        completedAt: data.completedAt ? new Date(data.completedAt) : null,
+        cost: data.cost ?? null,
+        fixedBy: data.fixedBy || null,
       },
       include: { property: true, tenant: true },
     });

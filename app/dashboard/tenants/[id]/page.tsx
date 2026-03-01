@@ -57,6 +57,10 @@ export default async function TenantDetailPage({
           status: m.status,
           priority: m.priority,
           createdAt: m.createdAt.toISOString(),
+          requestedAt: m.requestedAt?.toISOString() ?? null,
+          completedAt: m.completedAt?.toISOString() ?? null,
+          cost: m.cost,
+          fixedBy: m.fixedBy,
           property: { id: m.property.id, address: m.property.address },
         })),
       }}

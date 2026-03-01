@@ -39,6 +39,10 @@ type MaintenanceReq = {
   status: string;
   priority: string;
   createdAt: string;
+  requestedAt: string | null;
+  completedAt: string | null;
+  cost: number | null;
+  fixedBy: string | null;
   tenant: { id: string; name: string } | null;
 };
 
@@ -168,30 +172,39 @@ export default function PropertyDetailClient({ property }: { property: Property 
             <p className="px-6 py-4 text-sm text-gray-400">No maintenance requests.</p>
           ) : (
             property.maintenance.map((req) => (
-              <div key={req.id} className="px-6 py-3 flex items-center justify-between gap-2">
-                <div>
-                  <p className="text-sm font-medium text-gray-800">{req.description}</p>
-                  <div className="flex items-center gap-2 text-xs text-gray-500">
-                    <span>{new Date(req.createdAt).toLocaleDateString()}</span>
-                    {req.tenant && (
-                      <>
-                        <span>·</span>
-                        <Link
-                          href={`/dashboard/tenants/${req.tenant.id}`}
-                          className="text-blue-600 hover:text-blue-800 hover:underline"
-                        >
-                          {req.tenant.name}
-                        </Link>
-                      </>
-                    )}
+              <div key={req.id} className="px-6 py-3">
+                <div className="flex items-center justify-between gap-2">
+                  <div>
+                    <p className="text-sm font-medium text-gray-800">{req.description}</p>
+                    <div className="flex items-center gap-2 text-xs text-gray-500">
+                      <span>{req.requestedAt ? new Date(req.requestedAt).toLocaleDateString() : new Date(req.createdAt).toLocaleDateString()}</span>
+                      {req.tenant && (
+                        <>
+                          <span>·</span>
+                          <Link
+                            href={`/dashboard/tenants/${req.tenant.id}`}
+                            className="text-blue-600 hover:text-blue-800 hover:underline"
+                          >
+                            {req.tenant.name}
+                          </Link>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Badge variant={maintenanceVariant[req.priority] ?? "gray"}>{req.priority}</Badge>
+                    <Badge variant={req.status === "CLOSED" ? "green" : req.status === "IN_PROGRESS" ? "blue" : "yellow"}>
+                      {req.status.replace("_", " ")}
+                    </Badge>
                   </div>
                 </div>
-                <div className="flex gap-2">
-                  <Badge variant={maintenanceVariant[req.priority] ?? "gray"}>{req.priority}</Badge>
-                  <Badge variant={req.status === "CLOSED" ? "green" : req.status === "IN_PROGRESS" ? "blue" : "yellow"}>
-                    {req.status.replace("_", " ")}
-                  </Badge>
-                </div>
+                {(req.cost != null || req.fixedBy || req.completedAt) && (
+                  <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-gray-400 mt-1">
+                    {req.cost != null && <span className="text-gray-600 font-medium">${req.cost.toLocaleString()}</span>}
+                    {req.fixedBy && <span>by {req.fixedBy}</span>}
+                    {req.completedAt && <span>completed {new Date(req.completedAt).toLocaleDateString()}</span>}
+                  </div>
+                )}
               </div>
             ))
           )}

@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { maintenanceSchema, MaintenanceInput } from "@/lib/validations";
+import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
 import Textarea from "@/components/ui/Textarea";
 import Button from "@/components/ui/Button";
@@ -22,6 +23,12 @@ const statusOptions = [
   { value: "IN_PROGRESS", label: "In Progress" },
   { value: "CLOSED", label: "Closed" },
 ];
+
+function toDateInput(val: string | Date | undefined | null): string {
+  if (!val) return "";
+  const d = new Date(val);
+  return d.toISOString().split("T")[0];
+}
 
 interface Props {
   defaultValues?: Partial<MaintenanceInput & { id: string }>;
@@ -49,8 +56,14 @@ export default function MaintenanceForm({ defaultValues, onSuccess, onCancel }: 
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<MaintenanceInput>({
-    resolver: zodResolver(maintenanceSchema),
-    defaultValues: defaultValues ?? { priority: "MEDIUM", status: "OPEN" },
+    resolver: zodResolver(maintenanceSchema) as Resolver<MaintenanceInput>,
+    defaultValues: defaultValues
+      ? {
+          ...defaultValues,
+          requestedAt: toDateInput(defaultValues.requestedAt),
+          completedAt: toDateInput(defaultValues.completedAt),
+        }
+      : { priority: "MEDIUM", status: "OPEN" },
   });
 
   const onSubmit = async (data: MaintenanceInput) => {
@@ -118,6 +131,47 @@ export default function MaintenanceForm({ defaultValues, onSuccess, onCancel }: 
           />
         )}
       </div>
+
+      <div className="border-t border-gray-200 pt-4 mt-2">
+        <p className="text-sm font-medium text-gray-700 mb-3">Tracking Details</p>
+        <div className="grid grid-cols-2 gap-3">
+          <Input
+            id="requestedAt"
+            label="Date Requested"
+            type="date"
+            {...register("requestedAt")}
+            error={errors.requestedAt?.message}
+          />
+          <Input
+            id="completedAt"
+            label="Date Completed"
+            type="date"
+            {...register("completedAt")}
+            error={errors.completedAt?.message}
+          />
+        </div>
+        <div className="grid grid-cols-2 gap-3 mt-3">
+          <Input
+            id="cost"
+            label="Cost ($)"
+            type="number"
+            min={0}
+            step="0.01"
+            placeholder="0.00"
+            {...register("cost")}
+            error={errors.cost?.message}
+          />
+          <Input
+            id="fixedBy"
+            label="Fixed By"
+            type="text"
+            placeholder="Contractor or person name"
+            {...register("fixedBy")}
+            error={errors.fixedBy?.message}
+          />
+        </div>
+      </div>
+
       {error && <p className="text-sm text-red-600">{error}</p>}
       <div className="flex gap-3 pt-2">
         <Button type="submit" loading={isSubmitting}>

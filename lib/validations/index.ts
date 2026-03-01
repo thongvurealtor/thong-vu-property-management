@@ -41,6 +41,10 @@ export const maintenanceSchema = z.object({
   description: z.string().min(1, "Description is required"),
   priority: z.enum(["LOW", "MEDIUM", "HIGH"]).optional(),
   status: z.enum(["OPEN", "IN_PROGRESS", "CLOSED"]).optional(),
+  requestedAt: z.string().optional().nullable(),
+  completedAt: z.string().optional().nullable(),
+  cost: z.coerce.number().min(0, "Must be 0 or more").optional().nullable(),
+  fixedBy: z.string().optional().nullable(),
 });
 
 export const paymentSchema = z.object({

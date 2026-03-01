@@ -14,6 +14,10 @@ type MaintenanceRequest = {
   status: "OPEN" | "IN_PROGRESS" | "CLOSED";
   priority: "LOW" | "MEDIUM" | "HIGH";
   createdAt: string;
+  requestedAt: string | null;
+  completedAt: string | null;
+  cost: number | null;
+  fixedBy: string | null;
   property: { id: string; address: string };
   tenant: { id: string; name: string } | null;
 };
@@ -119,7 +123,23 @@ export default function MaintenancePage() {
                     )}
                   </div>
                   <p className="text-sm text-gray-600 mt-1">{r.description}</p>
-                  <p className="text-xs text-gray-400 mt-1">{new Date(r.createdAt).toLocaleDateString()}</p>
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-400 mt-2">
+                    {r.requestedAt && (
+                      <span>Requested: {new Date(r.requestedAt).toLocaleDateString()}</span>
+                    )}
+                    {r.completedAt && (
+                      <span>Completed: {new Date(r.completedAt).toLocaleDateString()}</span>
+                    )}
+                    {r.cost != null && (
+                      <span className="font-medium text-gray-600">Cost: ${r.cost.toLocaleString()}</span>
+                    )}
+                    {r.fixedBy && (
+                      <span>Fixed by: {r.fixedBy}</span>
+                    )}
+                    {!r.requestedAt && !r.completedAt && !r.cost && !r.fixedBy && (
+                      <span>{new Date(r.createdAt).toLocaleDateString()}</span>
+                    )}
+                  </div>
                 </div>
                 <div className="flex flex-col items-end gap-2 shrink-0">
                   <Badge variant={priorityVariant[r.priority]}>{r.priority}</Badge>
@@ -127,7 +147,7 @@ export default function MaintenancePage() {
                 </div>
               </div>
               <div className="flex gap-2 mt-3 pt-3 border-t border-gray-100">
-                <Button variant="secondary" size="sm" onClick={() => openEdit(r)}>Update Status</Button>
+                <Button variant="secondary" size="sm" onClick={() => openEdit(r)}>Edit</Button>
                 <Button variant="danger" size="sm" onClick={() => handleDelete(r.id)}>Delete</Button>
               </div>
             </Card>
@@ -150,6 +170,10 @@ export default function MaintenancePage() {
                   description: editing.description,
                   priority: editing.priority,
                   status: editing.status,
+                  requestedAt: editing.requestedAt,
+                  completedAt: editing.completedAt,
+                  cost: editing.cost,
+                  fixedBy: editing.fixedBy,
                 }
               : undefined
           }
