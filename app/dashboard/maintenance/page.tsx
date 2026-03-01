@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import Link from "next/link";
 import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
@@ -106,9 +107,15 @@ export default function MaintenancePage() {
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <p className="font-medium text-gray-900">{r.property.address}</p>
+                    <Link href={`/dashboard/properties/${r.property.id}`} className="font-medium text-blue-600 hover:text-blue-800 hover:underline">
+                      {r.property.address}
+                    </Link>
                     {r.tenant && (
-                      <span className="text-sm text-gray-500">· {r.tenant.name}</span>
+                      <span className="text-sm text-gray-500">·{" "}
+                        <Link href={`/dashboard/tenants/${r.tenant.id}`} className="text-blue-600 hover:text-blue-800 hover:underline">
+                          {r.tenant.name}
+                        </Link>
+                      </span>
                     )}
                   </div>
                   <p className="text-sm text-gray-600 mt-1">{r.description}</p>

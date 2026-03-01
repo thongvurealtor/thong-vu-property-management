@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import Link from "next/link";
 import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
@@ -13,8 +14,10 @@ type Lease = {
   endDate: string;
   monthlyRent: number;
   status: "ACTIVE" | "EXPIRED" | "TERMINATED";
-  property: { address: string };
-  tenant: { name: string };
+  propertyId: string;
+  tenantId: string;
+  property: { id: string; address: string };
+  tenant: { id: string; name: string };
   _count: { payments: number };
 };
 
@@ -91,10 +94,16 @@ export default function LeasesPage() {
               <tbody className="divide-y divide-gray-100">
                 {leases.map((l) => (
                   <tr key={l.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-5 py-3 font-medium text-gray-900 max-w-[180px] truncate">
-                      {l.property.address}
+                    <td className="px-5 py-3 font-medium max-w-[180px] truncate">
+                      <Link href={`/dashboard/properties/${l.property.id}`} className="text-blue-600 hover:text-blue-800 hover:underline">
+                        {l.property.address}
+                      </Link>
                     </td>
-                    <td className="px-5 py-3 text-gray-700">{l.tenant.name}</td>
+                    <td className="px-5 py-3">
+                      <Link href={`/dashboard/tenants/${l.tenant.id}`} className="text-blue-600 hover:text-blue-800 hover:underline">
+                        {l.tenant.name}
+                      </Link>
+                    </td>
                     <td className="px-5 py-3 text-gray-500 whitespace-nowrap">
                       {new Date(l.startDate).toLocaleDateString()} – {new Date(l.endDate).toLocaleDateString()}
                     </td>
@@ -129,8 +138,8 @@ export default function LeasesPage() {
             editing
               ? {
                   id: editing.id,
-                  propertyId: "",
-                  tenantId: "",
+                  propertyId: editing.propertyId,
+                  tenantId: editing.tenantId,
                   startDate: editing.startDate,
                   endDate: editing.endDate,
                   monthlyRent: editing.monthlyRent,
