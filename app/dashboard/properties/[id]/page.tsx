@@ -22,7 +22,6 @@ export default async function PropertyDetailPage({
           tenant: true,
           payments: {
             where: { dueDate: { gte: startOfMonth, lte: endOfMonth } },
-            select: { id: true, amount: true, status: true, paymentMethod: true, paidAt: true },
           },
         },
         orderBy: { createdAt: "desc" },

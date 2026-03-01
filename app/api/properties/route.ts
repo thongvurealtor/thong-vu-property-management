@@ -12,24 +12,29 @@ export async function GET() {
       orderBy: { createdAt: "desc" },
       include: {
         _count: { select: { leases: true, maintenance: true } },
-        leases: {
-          where: { status: "ACTIVE" },
-          select: {
-            id: true,
-            tenant: { select: { name: true } },
-            payments: {
-              where: {
-                dueDate: { gte: startOfMonth, lte: endOfMonth },
-              },
-              select: { status: true },
-            },
-          },
+      },
+    });
+
+    const activeLeases = await prisma.lease.findMany({
+      where: {
+        status: "ACTIVE",
+        propertyId: { in: properties.map((p) => p.id) },
+      },
+      include: {
+        tenant: { select: { name: true } },
+        payments: {
+          where: { dueDate: { gte: startOfMonth, lte: endOfMonth } },
+          select: { status: true },
         },
       },
     });
 
+    const leaseByProperty = new Map(
+      activeLeases.map((l) => [l.propertyId, l])
+    );
+
     const result = properties.map((p) => {
-      const activeLease = p.leases[0];
+      const activeLease = leaseByProperty.get(p.id);
       let monthlyPaymentStatus: "PAID" | "UNPAID" | "NO_LEASE" = "NO_LEASE";
       let activeTenantName: string | null = null;
 
@@ -39,9 +44,7 @@ export async function GET() {
         monthlyPaymentStatus = monthPayment?.status === "PAID" ? "PAID" : "UNPAID";
       }
 
-      const { leases: _leases, ...rest } = p;
-      void _leases;
-      return { ...rest, monthlyPaymentStatus, activeTenantName };
+      return { ...p, monthlyPaymentStatus, activeTenantName };
     });
 
     return NextResponse.json(result);
