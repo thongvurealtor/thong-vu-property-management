@@ -16,6 +16,8 @@ type Property = {
   bathrooms: number;
   rent: number;
   status: "AVAILABLE" | "OCCUPIED" | "MAINTENANCE";
+  monthlyPaymentStatus: "PAID" | "UNPAID" | "NO_LEASE";
+  activeTenantName: string | null;
   _count: { leases: number; maintenance: number };
 };
 
@@ -86,6 +88,28 @@ export default function PropertiesPage() {
                 <Badge variant={statusVariant[p.status] ?? "gray"}>{p.status}</Badge>
               </div>
               <p className="text-xl font-bold text-gray-900">${p.rent.toLocaleString()}<span className="text-sm font-normal text-gray-400">/mo</span></p>
+              {p.monthlyPaymentStatus !== "NO_LEASE" && (
+                <div className="flex items-center gap-2 text-sm">
+                  {p.monthlyPaymentStatus === "PAID" ? (
+                    <span className="flex items-center gap-1.5 text-green-600">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span className="font-medium">Paid this month</span>
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-1.5 text-red-500">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                      <span className="font-medium">Not paid this month</span>
+                    </span>
+                  )}
+                  {p.activeTenantName && (
+                    <span className="text-gray-400 text-xs">· {p.activeTenantName}</span>
+                  )}
+                </div>
+              )}
               <div className="flex gap-3 text-xs text-gray-500">
                 <span>{p._count.leases} lease{p._count.leases !== 1 ? "s" : ""}</span>
                 <span>{p._count.maintenance} maintenance</span>

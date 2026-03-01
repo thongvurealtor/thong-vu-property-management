@@ -10,10 +10,23 @@ export default async function PropertyDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const now = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+
   const property = await prisma.property.findUnique({
     where: { id },
     include: {
-      leases: { include: { tenant: true }, orderBy: { createdAt: "desc" } },
+      leases: {
+        include: {
+          tenant: true,
+          payments: {
+            where: { dueDate: { gte: startOfMonth, lte: endOfMonth } },
+            select: { id: true, amount: true, status: true, paymentMethod: true, paidAt: true },
+          },
+        },
+        orderBy: { createdAt: "desc" },
+      },
       maintenance: { include: { tenant: true }, orderBy: { createdAt: "desc" } },
     },
   });
@@ -29,14 +42,25 @@ export default async function PropertyDetailPage({
         bathrooms: property.bathrooms,
         rent: property.rent,
         status: property.status,
-        leases: property.leases.map((l) => ({
-          id: l.id,
-          startDate: l.startDate.toISOString(),
-          endDate: l.endDate.toISOString(),
-          monthlyRent: l.monthlyRent,
-          status: l.status,
-          tenant: { id: l.tenant.id, name: l.tenant.name },
-        })),
+        leases: property.leases.map((l) => {
+          const monthPayment = l.payments[0];
+          return {
+            id: l.id,
+            startDate: l.startDate.toISOString(),
+            endDate: l.endDate.toISOString(),
+            monthlyRent: l.monthlyRent,
+            status: l.status,
+            tenant: { id: l.tenant.id, name: l.tenant.name },
+            currentMonthPayment: monthPayment
+              ? {
+                  status: monthPayment.status,
+                  amount: monthPayment.amount,
+                  method: monthPayment.paymentMethod,
+                  paidAt: monthPayment.paidAt?.toISOString() ?? null,
+                }
+              : null,
+          };
+        }),
         maintenance: property.maintenance.map((m) => ({
           id: m.id,
           description: m.description,

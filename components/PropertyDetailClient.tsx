@@ -9,6 +9,13 @@ import Button from "@/components/ui/Button";
 import Modal from "@/components/ui/Modal";
 import LeaseForm from "@/components/forms/LeaseForm";
 
+type CurrentMonthPayment = {
+  status: string;
+  amount: number;
+  method: string | null;
+  paidAt: string | null;
+};
+
 type Lease = {
   id: string;
   startDate: string;
@@ -16,6 +23,14 @@ type Lease = {
   monthlyRent: number;
   status: string;
   tenant: { id: string; name: string };
+  currentMonthPayment: CurrentMonthPayment | null;
+};
+
+const methodLabel: Record<string, string> = {
+  CHECK: "Check",
+  ZELLE: "Zelle",
+  VENMO: "Venmo",
+  ACH: "ACH",
 };
 
 type MaintenanceReq = {
@@ -97,20 +112,44 @@ export default function PropertyDetailClient({ property }: { property: Property 
             <p className="px-6 py-4 text-sm text-gray-400">No leases found.</p>
           ) : (
             property.leases.map((lease) => (
-              <div key={lease.id} className="px-6 py-3 flex items-center justify-between gap-2">
-                <div>
-                  <Link
-                    href={`/dashboard/tenants/${lease.tenant.id}`}
-                    className="text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline"
-                  >
-                    {lease.tenant.name}
-                  </Link>
-                  <p className="text-xs text-gray-500">
-                    {new Date(lease.startDate).toLocaleDateString()} –{" "}
-                    {new Date(lease.endDate).toLocaleDateString()} · ${lease.monthlyRent.toLocaleString()}/mo
-                  </p>
+              <div key={lease.id} className="px-6 py-3 space-y-2">
+                <div className="flex items-center justify-between gap-2">
+                  <div>
+                    <Link
+                      href={`/dashboard/tenants/${lease.tenant.id}`}
+                      className="text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline"
+                    >
+                      {lease.tenant.name}
+                    </Link>
+                    <p className="text-xs text-gray-500">
+                      {new Date(lease.startDate).toLocaleDateString()} –{" "}
+                      {new Date(lease.endDate).toLocaleDateString()} · ${lease.monthlyRent.toLocaleString()}/mo
+                    </p>
+                  </div>
+                  <Badge variant={leaseVariant[lease.status] ?? "gray"}>{lease.status}</Badge>
                 </div>
-                <Badge variant={leaseVariant[lease.status] ?? "gray"}>{lease.status}</Badge>
+                {lease.status === "ACTIVE" && (
+                  <div className="flex items-center gap-2 text-sm">
+                    {lease.currentMonthPayment?.status === "PAID" ? (
+                      <span className="flex items-center gap-1.5 text-green-600">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span className="font-medium">
+                          Paid ${lease.currentMonthPayment.amount.toLocaleString()}
+                          {lease.currentMonthPayment.method && ` via ${methodLabel[lease.currentMonthPayment.method] ?? lease.currentMonthPayment.method}`}
+                        </span>
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-1.5 text-red-500">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                        <span className="font-medium">Not paid this month</span>
+                      </span>
+                    )}
+                  </div>
+                )}
               </div>
             ))
           )}
